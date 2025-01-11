@@ -1,0 +1,4 @@
+pygame-ce
+PyQt-Fluent-Widgets[full]
+svgwrite
+numpy
