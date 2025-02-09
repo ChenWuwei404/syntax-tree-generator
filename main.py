@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QFrame, QHBoxLayout
 from PyQt5.QtGui import QIcon, QFont
 from PyQt5.QtSvg import QSvgWidget
 
-from qfluentwidgets import SubtitleLabel, TitleLabel, PrimaryPushButton, TextEdit, FluentWindow, setFont, VBoxLayout, IndeterminateProgressBar, InfoBar, InfoBarPosition, CheckBox
+from qfluentwidgets import SubtitleLabel, TitleLabel, PrimaryPushButton, PlainTextEdit, FluentWindow, setFont, VBoxLayout, IndeterminateProgressBar, InfoBar, InfoBarPosition, CheckBox
 from qfluentwidgets import FluentIcon as FIF
 
 import threading
@@ -19,14 +19,19 @@ SETTINGS = {}
 with open(r'settings.json', 'r') as f:
     SETTINGS = json.load(f)
 
+USERLANG = "chinese"
+LANG = {}
+with open(r'i18n.json', 'r', encoding='utf-8') as f:
+    LANG = json.load(f)
+
 def generate():
     # threading.Thread(target=lambda: window.mainPage.processBar.show()).start()
-    code = window.mainPage.expressionInput.toPlainText()
+    code = window.mainPage.expressionInput.toPlainText().replace('\n', '')
     end_leveled = window.mainPage.configs.endLeveledSwitch.isChecked()
     try:
         size = generate_file(code, 'test.svg', end_leveled)
         window.mainPage.svg.load('./test.svg')
-        window.mainPage.svg.setFixedSize(size[0], size[1])
+        window.mainPage.svg.setFixedSize(int(size[0]*0.75), int(size[1]*0.75))
         with open(r'settings.json', 'w') as f:
             SETTINGS["last"] = {"code": code, "size": size, "aligned": end_leveled}
             json.dump(SETTINGS, f)
@@ -36,27 +41,30 @@ def generate():
     
     # threading.Thread(target=lambda: window.mainPage.processBar.hide()).start()
 
-class ExpressionInput(TextEdit):
+class ExpressionInput(PlainTextEdit):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName('ExpressionInput')
-        self.setPlaceholderText("Enter an expression here...")
+        self.setPlaceholderText(LANG[USERLANG]['syntax-tree-generator']['spaceholder'])
         self.setFixedHeight(128)
         self.setFont(CONSOLAS)
 
-class ConfigsBar(QHBoxLayout):
+class ConfigsBar(QFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName('Configs')
 
-        self.endLeveledSwitch = CheckBox("End-symbols aligned")
-        self.endLeveledSwitch.setChecked(SETTINGS["last"]["aligned"])
-        self.addWidget(self.endLeveledSwitch, alignment=Qt.AlignLeft)
+        self.hBoxLayout = QHBoxLayout(self)
+        self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
 
-        self.generateButton = PrimaryPushButton(FIF.PLAY_SOLID, "Generate")
+        self.endLeveledSwitch = CheckBox(LANG[USERLANG]['syntax-tree-generator']['termainals-aligned'])
+        self.endLeveledSwitch.setChecked(SETTINGS["last"]["aligned"])
+        self.hBoxLayout.addWidget(self.endLeveledSwitch, alignment=Qt.AlignLeft)
+
+        self.generateButton = PrimaryPushButton(FIF.PLAY_SOLID, LANG[USERLANG]['syntax-tree-generator']['generate'])
         self.generateButton.setFixedSize(128, 32)
         self.generateButton.clicked.connect(lambda: generate())
-        self.addWidget(self.generateButton, alignment=Qt.AlignRight)
+        self.hBoxLayout.addWidget(self.generateButton, alignment=Qt.AlignRight)
 
 class MainPage(QFrame):
     def __init__(self, parent=None):
@@ -68,20 +76,19 @@ class MainPage(QFrame):
         self.vBoxLayout.setSpacing(16)
         self.vBoxLayout.setAlignment(Qt.AlignTop)
 
-        self.lable1 = TitleLabel("Generate Syntax Tree")
+        self.lable1 = TitleLabel(LANG[USERLANG]['syntax-tree-generator']['title'])
         self.vBoxLayout.addWidget(self.lable1)
 
         self.expressionInput = ExpressionInput(self)
-        self.expressionInput.setPlaceholderText("Enter an expression here...")
-        self.expressionInput.setText(SETTINGS["last"]["code"])
+        self.expressionInput.setPlainText(SETTINGS["last"]["code"])
         self.vBoxLayout.addWidget(self.expressionInput)
 
         
 
         self.configs = ConfigsBar(self)
-        self.vBoxLayout.addLayout(self.configs)
+        self.vBoxLayout.addWidget(self.configs)
 
-        self.lable2 = SubtitleLabel("Result")
+        self.lable2 = SubtitleLabel(LANG[USERLANG]['syntax-tree-generator']['result'])
         self.vBoxLayout.addWidget(self.lable2)
 
         self.processBar = IndeterminateProgressBar(self)
@@ -90,7 +97,7 @@ class MainPage(QFrame):
         self.svg = QSvgWidget(self)
         self.svg.load('./test.svg')
         size = SETTINGS["last"]["size"]
-        self.svg.setFixedSize(size[0], size[1])
+        self.svg.setFixedSize(int(size[0]*0.75), int(size[1]*0.75))
         self.vBoxLayout.addWidget(self.svg, 0)
 
 

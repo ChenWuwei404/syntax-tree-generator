@@ -1,0 +1,27 @@
+{
+    "english":
+    {
+        "language": "Language",
+        "syntax-tree-generator":
+        {
+            "title": "Generate Syntax Tree",
+            "spaceholder": "Enter an expression here...",
+            "termainals-aligned": "Terminals aligned",
+            "generate": "Generate",
+            "result": "Result"
+        }
+    },
+
+    "chinese":
+    {
+        "language": "语言",
+        "syntax-tree-generator":
+        {
+            "title": "生成语法树",
+            "spaceholder": "输入表达式...",
+            "termainals-aligned": "终极符号对齐",
+            "generate": "生成",
+            "result": "结果"
+        }
+    }
+}
